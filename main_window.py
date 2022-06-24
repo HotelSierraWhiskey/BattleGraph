@@ -5,12 +5,10 @@ from graphing import Graph
 
 
 class MainWindow(BaseMainWindow):
-    def __init__(self, quit_application_callback, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent=parent)
 
         self.infile = None
-
-        self.quit = quit_application_callback
 
         self.setAcceptDrops(True)
         widget = QWidget(self)
@@ -18,18 +16,13 @@ class MainWindow(BaseMainWindow):
 
         self.current_file_label = QLabel('')
 
-        main_menu_callbacks = {
-            'quit_application_callback': self.quit,
-            'change_current_file_label_callback': self.current_file_label.setText,
-            'get_current_file_label_callback': self.current_file_label.text
-        }
-
-        self.main_menu = MainMenuBar(main_menu_callbacks)
+        self.main_menu = MainMenuBar()
         self.graph = Graph()
 
 
         self.main_menu.file_submenu.infile_changed.connect(self.update_infile)
-        self.main_menu.file_submenu.infile_changed.connect(self.graph.update)
+        self.main_menu.file_submenu.infile_changed.connect(self.graph.update_data)
+        self.main_menu.file_submenu.infile_changed.connect(self.graph.update_graph)
 
 
         with CVBoxLayout(widget) as layout:
