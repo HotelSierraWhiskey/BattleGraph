@@ -3,8 +3,12 @@ from qtstrap import *
 
 
 class FileMenu(QMenu):
+
+    infile_changed = Signal(str)
+
     def __init__(self, callbacks, *args, **kwargs):
         super().__init__(title='File', *args, **kwargs)
+
         self.callbacks = callbacks
         self.filename = None
         self.addAction('Import File', self.open_file_dialog)
@@ -17,10 +21,9 @@ class FileMenu(QMenu):
         fname = QFileDialog.getOpenFileName(self, 'Open File')
         if fname:
             self.filename = fname[0]
-            self.callbacks['change_current_file_label_callback'](self.filename)
-
-
-
+            self.infile_changed.emit(self.filename)
+            # self.callbacks['change_current_file_label_callback'](self.filename)
+            
 
 
 class MainMenuBar(QMenuBar):
@@ -34,6 +37,6 @@ class MainMenuBar(QMenuBar):
             'change_current_file_label_callback': self.callbacks['change_current_file_label_callback']
         }
 
-        file_submenu = FileMenu(file_submenu_callbacks)
+        self.file_submenu = FileMenu(file_submenu_callbacks)
 
-        self.addMenu(file_submenu)
+        self.addMenu(self.file_submenu)

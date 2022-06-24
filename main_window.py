@@ -1,11 +1,14 @@
 from bs4 import BeautifulSoup
 from qtstrap import *
 from menu import MainMenuBar
+from graphing import Graph
 
 
 class MainWindow(BaseMainWindow):
     def __init__(self, quit_application_callback, parent=None):
         super().__init__(parent=parent)
+
+        self.infile = None
 
         self.quit = quit_application_callback
 
@@ -17,16 +20,24 @@ class MainWindow(BaseMainWindow):
 
         main_menu_callbacks = {
             'quit_application_callback': self.quit,
-            'change_current_file_label_callback': self.current_file_label.setText
+            'change_current_file_label_callback': self.current_file_label.setText,
+            'get_current_file_label_callback': self.current_file_label.text
         }
 
         self.main_menu = MainMenuBar(main_menu_callbacks)
+        self.graph = Graph()
+
+
+        self.main_menu.file_submenu.infile_changed.connect(self.update_infile)
+        self.main_menu.file_submenu.infile_changed.connect(self.graph.update)
+
 
         with CVBoxLayout(widget) as layout:
             with layout.hbox() as layout:
                 with layout.vbox() as layout:
                     layout.add(self.main_menu)
                     layout.add(self.current_file_label)
+                    layout.add(self.graph)
 
 
     def dragEnterEvent(self, event):
@@ -43,49 +54,16 @@ class MainWindow(BaseMainWindow):
             event.setDropAction(Qt.CopyAction)
             event.accept()
             fname = event.mimeData().urls()[0].url()
+            self.infile = fname
             self.current_file_label.setText(fname)
+
+    def update_infile(self, fname):
+        self.infile = fname
+        self.current_file_label.setText(self.infile)
+
     
 
 
 
-
-
-
-
-# parser = argparse.ArgumentParser(description="process a BattleScribe html file")
-
-# parser.add_argument('infile', type=str, help="provide an html file to process")
-
-# args = parser.parse_args()
-
-
-# with open(args.infile) as file:
-#     soup = BeautifulSoup(file, 'html.parser')
-
-#     title = soup.find('h1')
-
-#     print(title)
-
-
-# class BattleGraph:
-#     def __init__(self):
-#         self.data = {}
-#         try:
-#             with open(args.infile) as file:
-#                 soup = BeautifulSoup(file, 'html.parser')
-#                 categories = soup.find_all('li', {'class': 'category'})
-
-
-
-#                 self.data['title'] = soup.find('h1').contents[0]
-#                 self.data['categories'] = [soup.find('h3') for _ in categories]
-
-
-#         except FileNotFoundError:
-#             print(f'File not found ({args.infile})')
-
-#         print(self.data)
-
-# graph = BattleGraph()
 
 
