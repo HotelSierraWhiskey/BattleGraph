@@ -4,7 +4,9 @@ from main_window import MainWindow
 
 def main():
     app = BaseApplication(['Battlegraph'])
-    window = MainWindow(app.quit)
+    window = MainWindow()
+
+    window.main_menu.file_submenu.quit_application.connect(app.quit)
 
     set_font_options(window, {'setPointSize': 12})
     window.setMinimumSize(400, 300)
