@@ -45,7 +45,9 @@ class FileMenu(QMenu):
         pdf = weasyprint.HTML(temphtml).write_pdf()
         open(f'{fname}.pdf', 'wb').write(pdf)
         shutil.rmtree('./temp')
-        
+
+    
+
 
 
 
