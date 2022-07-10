@@ -19,6 +19,7 @@ class MainWindow(BaseMainWindow):
 
         self.main_menu.file_submenu.infile_changed.connect(self.update_infile)
         self.main_menu.file_submenu.infile_changed.connect(self.graph.update)
+        self.main_menu.file_submenu.export_requested.connect(self.graph.save_image)
         self.graph.infile_changed.connect(self.update_infile)
 
         with CVBoxLayout(widget) as layout:
