@@ -6,8 +6,6 @@ class Parser:
         self.infile = infile
         self.soup = None
         self.data = {}
-        if self.infile:
-            self.load_html()
 
     def load_html(self):
         with open(self.infile) as file:
