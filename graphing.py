@@ -16,6 +16,7 @@ class Graph(QWebEngineView):
         self.setAcceptDrops(True)
         self.parser = Parser()
         self.html = ''
+        self.fig = None
         self._update_graph()
 
     def _update_data(self, infile):
@@ -31,13 +32,18 @@ class Graph(QWebEngineView):
             labels = list(graph_data.keys())
             values = list(graph_data.values())
 
-            fig = Figure(data=[Pie(labels=labels, values=values)])
+            self.fig = Figure(data=[Pie(labels=labels, values=values)])
 
-            self.html += plotly.offline.plot(fig, output_type='div', include_plotlyjs='cdn') 
+            self.html += plotly.offline.plot(self.fig, output_type='div', include_plotlyjs='cdn') 
             # TODO: offline include_plotlyjs values don't seem to work. 'cdn' requires an internet connection. 
 
         self.html += '</body></html>'
         self.setHtml(self.html)
+
+    def save_image(self, fname):
+        if self.fig:
+            self.fig.write_image(f'temp/{fname}')
+
 
     def update(self, infile):
         self._update_data(infile)
