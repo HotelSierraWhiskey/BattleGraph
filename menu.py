@@ -27,6 +27,11 @@ class FileMenu(QMenu):
             self.infile_changed.emit(self.filename)
 
     def export_pdf(self):
+
+        # NOTE: in order to avoid system level dependencies, a temporary image (fig.png) of plotly's
+        # graph output is referenced in a copy (temp.html) of the current infile. The output .pdf 
+        # file is generated from these two temporary files (fig.png and temp.html). 
+
         os.mkdir('temp')
         self.export_requested.emit('fig.png')
         temphtml = './temp/temp.html'
