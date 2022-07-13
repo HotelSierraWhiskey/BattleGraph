@@ -6,19 +6,44 @@ from plotly.graph_objects import Figure, Pie
 import plotly
 
 
-class Graph(QWebEngineView):
-    
+
+class BaseGraph(QWebEngineView):
+
     infile_changed = Signal(str)
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setAcceptDrops(True)
+    
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            event.ignore() 
+
+    def dragMoveEvent(self, event):
+        event.acceptProposedAction()
+    
+    def dropEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.setDropAction(Qt.CopyAction)
+            event.accept()
+            fname = event.mimeData().urls()[0].url()
+            infile = fname.replace('file://', '')
+            self.infile_changed.emit(infile)
+            self.update(infile)
+
+
+class PieChart(BaseGraph):
+    
+    from piechart import parse
+    parser = Parser(parse)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
+        
+        self.setMinimumHeight(675)
         self.setAcceptDrops(True)
-        self.parser = Parser()
-        self.html = '<html><body>'
-        self.fig = Figure()
-        self.html += plotly.offline.plot(self.fig, output_type='div', include_plotlyjs='cdn') 
-        self.html += '</body></html>'
         self._update_graph()
 
     def _update_data(self, infile):
@@ -38,7 +63,9 @@ class Graph(QWebEngineView):
 
             title = self.parser.data['title']
 
-            self.fig = Figure(data=[Pie(labels=labels, values=values, text=text, textfont_size=12, textposition='outside')])
+            pie = Pie(labels=labels, values=values, text=text, textfont_size=12, textposition='outside')
+
+            self.fig = Figure([pie])
             self.fig.update_layout(title=title, font=dict(size=10), legend=dict(orientation='h', yanchor="top", xanchor="right"))
 
             self.html += plotly.offline.plot(self.fig, output_type='div', include_plotlyjs='cdn') 
@@ -54,25 +81,8 @@ class Graph(QWebEngineView):
         if self.fig:
             self.fig.write_image(f'temp/{fname}')
 
-
     def update(self, infile):
         self._update_data(infile)
         self._update_graph()
 
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.accept()
-        else:
-            event.ignore() 
 
-    def dragMoveEvent(self, event):
-        event.acceptProposedAction()
-    
-    def dropEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.setDropAction(Qt.CopyAction)
-            event.accept()
-            fname = event.mimeData().urls()[0].url()
-            infile = fname.replace('file://', '')
-            self.infile_changed.emit(infile)
-            self.update(infile)
