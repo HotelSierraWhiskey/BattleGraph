@@ -15,27 +15,37 @@ class Graph(QWebEngineView):
 
         self.setAcceptDrops(True)
         self.parser = Parser()
-        self.html = ''
-        self.fig = None
+        self.html = '<html><body>'
+        self.fig = Figure()
+        self.html += plotly.offline.plot(self.fig, output_type='div', include_plotlyjs='cdn') 
+        self.html += '</body></html>'
         self._update_graph()
 
     def _update_data(self, infile):
         self.parser.infile = infile
         self.parser.load_html()
-        self.parser.parse_data()
 
     def _update_graph(self):
-        self.html = "<html><body>" 
+        self.html = '<html><body>' 
 
         if self.parser.infile:
-            graph_data = self.parser.data['categories']
-            labels = list(graph_data.keys())
-            values = list(graph_data.values())
+            labels = list(self.parser.data['categories'].keys())
+            values = []
+            text = []
+            for i in labels:
+                values.append(self.parser.data['categories'][i]['pts'])
+                text.append(self.parser.data['categories'][i]['units'])
 
-            self.fig = Figure(data=[Pie(labels=labels, values=values)])
+            title = self.parser.data['title']
+
+            self.fig = Figure(data=[Pie(labels=labels, values=values, text=text, textfont_size=12, textposition='outside')])
+            self.fig.update_layout(title=title, font=dict(size=10), legend=dict(orientation='h', yanchor="top", xanchor="right"))
 
             self.html += plotly.offline.plot(self.fig, output_type='div', include_plotlyjs='cdn') 
-            # TODO: offline include_plotlyjs values don't seem to work. 'cdn' requires an internet connection. 
+
+            # TODO: other include_plotlyjs values don't seem to work. 'cdn' works but requires an internet connection.
+            # the html produced by offline options (when output_type='file') will render plotly graphs 
+            # when loaded by a browser, but will fail to load in a QWebEngine. Or something. 
 
         self.html += '</body></html>'
         self.setHtml(self.html)
