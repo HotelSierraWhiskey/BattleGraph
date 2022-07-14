@@ -1,6 +1,6 @@
 from qtstrap import *
 from menu import MainMenuBar
-from graphing import PieChart
+from graphing import FileViewer, PieChart
 
 
 class MainWindow(BaseMainWindow):
@@ -15,15 +15,25 @@ class MainWindow(BaseMainWindow):
         self.current_file_label = QLabel('')
 
         self.main_menu = MainMenuBar()
+
+        self.file_viewer = FileViewer()
         self.pie_chart = PieChart()
 
+        self.tab_objects = {'File Viewer': self.file_viewer, 
+                            'Slot Distribution': self.pie_chart}
+        
         self.tabs = QTabWidget()
-        self.tabs.addTab(self.pie_chart, 'Slot Distribution')
+        
+        for k, v in self.tab_objects.items():
+            self.tabs.addTab(v, k)
 
-        self.main_menu.file_submenu.infile_changed.connect(self.update_infile)
+        self.main_menu.file_submenu.infile_changed.connect(self.update)
         self.main_menu.file_submenu.infile_changed.connect(self.pie_chart.update)
+        self.main_menu.file_submenu.infile_changed.connect(self.file_viewer.update)
         self.main_menu.file_submenu.export_requested.connect(self.pie_chart.save_image)
-        self.pie_chart.infile_changed.connect(self.update_infile)
+
+        self.pie_chart.infile_changed.connect(self.update)
+        self.file_viewer.infile_changed.connect(self.update)
 
         with CVBoxLayout(widget) as layout:
             with layout.hbox() as layout:
@@ -31,11 +41,12 @@ class MainWindow(BaseMainWindow):
                     layout.add(self.main_menu)
                     layout.add(self.current_file_label)
                     layout.add(self.tabs)
-                    # layout.add(self.graph)
 
-    def update_infile(self, fname):
+    def update(self, fname):
         self.infile = fname
         self.current_file_label.setText(self.infile)
+        for tab in self.tab_objects.values():
+            tab.update(self.infile)
 
     
 
