@@ -13,6 +13,7 @@ class MainWindow(BaseMainWindow):
         self.setCentralWidget(widget)
 
         self.current_file_label = QLabel('No file selected')
+        self.status_label = QLabel('')
 
         self.main_menu = MainMenuBar()
 
@@ -30,6 +31,7 @@ class MainWindow(BaseMainWindow):
         self.main_menu.file_submenu.infile_changed.connect(self.update)
         self.main_menu.file_submenu.infile_changed.connect(self.pie_chart.update)
         self.main_menu.file_submenu.infile_changed.connect(self.file_viewer.update)
+        self.main_menu.file_submenu.status_update.connect(self.status_label.setText)
         self.main_menu.file_submenu.export_requested.connect(self.pie_chart.save_image)
 
         self.pie_chart.infile_changed.connect(self.update)
@@ -39,14 +41,18 @@ class MainWindow(BaseMainWindow):
             with layout.hbox() as layout:
                 with layout.vbox() as layout:
                     layout.add(self.main_menu)
-                    layout.add(self.current_file_label)
+                    with layout.hbox() as layout:
+                        layout.add(self.current_file_label)
+                        layout.add(self.status_label)
                     layout.add(self.tabs)
 
     def update(self, fname):
         self.infile = fname
-        self.current_file_label.setText(self.infile)
+        self.main_menu.file_submenu.filename = self.infile
         for tab in self.tab_objects.values():
             tab.update(self.infile)
+        
+        self.current_file_label.setText(self.infile)
 
     
 
