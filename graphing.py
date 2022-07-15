@@ -71,7 +71,12 @@ class PieChart(BaseEngineView):
             title = self.parser.data['title']
 
             self.fig = Figure([Pie(labels=labels, values=values, text=text, textfont_size=12,textposition='outside')])
-            self.fig.update_layout(title=title, font=dict(size=10), legend=dict(orientation='h', yanchor="top", xanchor="right"))
+            self.fig.update_layout(title=title, 
+                                   font=dict(size=10), 
+                                   legend=dict(orientation='h',
+                                   yanchor="top", 
+                                   xanchor="right"))
+            self.fig.update_traces(hovertemplate="%{label}<br>%{value} pts<extra></extra>")
 
             self.html += plotly.offline.plot(self.fig, output_type='div', include_plotlyjs='cdn') 
 
