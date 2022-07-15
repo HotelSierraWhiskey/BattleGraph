@@ -1,5 +1,7 @@
 from qtstrap import *
 import os
+from threading import Thread
+import time
 import shutil
 from bs4 import BeautifulSoup
 import weasyprint
@@ -10,6 +12,7 @@ class FileMenu(QMenu):
     infile_changed = Signal(str)
     quit_application = Signal()
     export_requested = Signal(str)
+    status_update = Signal(str)
 
     def __init__(self, *args, **kwargs):
         super().__init__(title='File', *args, **kwargs)
@@ -27,11 +30,23 @@ class FileMenu(QMenu):
             self.infile_changed.emit(self.filename)
 
     def export_pdf(self):
+        thread = Thread(target=self._export_pdf)
+        thread.start()
+
+    def _export_pdf(self):
 
         # NOTE: in order to avoid system level dependencies, a temporary image (fig.png) of plotly's
         # graph output is referenced in a copy (temp.html) of the current infile. The output .pdf 
         # file is generated from these two temporary files (fig.png and temp.html). 
+        if not self.filename:
+            self.status_update.emit('Nothing to export')
+            return
 
+        if os.path.exists('./temp'):
+            shutil.rmtree('./temp')
+
+        fname = self.filename.split('/')[-1].replace('.html', '')
+        self.status_update.emit(f'Exporting {fname}.pdf...')
         os.mkdir('temp')
         self.export_requested.emit('fig.png')
         temphtml = './temp/temp.html'
@@ -46,17 +61,20 @@ class FileMenu(QMenu):
             soup.body.append(fig)
             file.write(str(soup))
 
-        fname = self.filename.split('/')[-1].replace('.html', '')
         pdf = weasyprint.HTML(temphtml).write_pdf()
         open(f'{fname}.pdf', 'wb').write(pdf)
         shutil.rmtree('./temp')
+        self.status_update.emit('Export complete')
+        time.sleep(3)
+        self.status_update.emit('')
 
     
 
 class MainMenuBar(QMenuBar):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+        self.setMaximumHeight(30)
+
         self.file_submenu = FileMenu()
 
         self.addMenu(self.file_submenu)
