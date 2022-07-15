@@ -3,7 +3,7 @@ from main_window import MainWindow
 
 
 def main():
-    app = BaseApplication(['Battlegraph'])
+    app = BaseApplication(['BattleGraph'])
     window = MainWindow()
 
     window.main_menu.file_submenu.quit_application.connect(app.quit)
