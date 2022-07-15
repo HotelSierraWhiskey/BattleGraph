@@ -12,7 +12,7 @@ class MainWindow(BaseMainWindow):
         widget = QWidget(self)
         self.setCentralWidget(widget)
 
-        self.current_file_label = QLabel('')
+        self.current_file_label = QLabel('No file selected')
 
         self.main_menu = MainMenuBar()
 
