@@ -1,15 +1,17 @@
 from qtstrap import *
 from bs4 import BeautifulSoup
+import re
 from parser import Parser
-from PySide2.QtWebEngineWidgets import QWebEngineView
+from PySide2.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from plotly.graph_objects import Figure, Pie
 import plotly
+
 
 
 class BaseEngineView(QWebEngineView):
 
     infile_changed = Signal(str)
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setAcceptDrops(True)
@@ -35,15 +37,43 @@ class BaseEngineView(QWebEngineView):
 
 
 class FileViewer(BaseEngineView):
+
+    search_requested = Signal()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.soup = None
         self.html = ''
+        
+        
+
+
 
     def update(self, infile):
         with open(infile) as file:
-            soup = BeautifulSoup(file, 'html.parser')
-            self.html = str(soup)
+            self.soup = BeautifulSoup(file, 'html.parser')
+            self.html = str(self.soup)
             self.setHtml(self.html)
+            self.show()
+
+    def callback(self, text):
+        self.triggerPageAction
+        
+
+    def find(self, text):        
+        flags = QWebEnginePage.FindFlags(0)
+        self.findText(text, flags, self.callback)
+        self.search_requested.emit()
+
+    def clear(self):
+        flags = QWebEnginePage.FindFlags(0)
+        self.findText('', flags, self.callback)
+        self.search_requested.emit()
+
+
+    
+
+
         
 
 class PieChart(BaseEngineView):
