@@ -45,10 +45,6 @@ class FileViewer(BaseEngineView):
         self.soup = None
         self.html = ''
         
-        
-
-
-
     def update(self, infile):
         with open(infile) as file:
             self.soup = BeautifulSoup(file, 'html.parser')
@@ -59,7 +55,6 @@ class FileViewer(BaseEngineView):
     def callback(self, text):
         self.triggerPageAction
         
-
     def find(self, text):        
         flags = QWebEnginePage.FindFlags(0)
         self.findText(text, flags, self.callback)
@@ -69,11 +64,6 @@ class FileViewer(BaseEngineView):
         flags = QWebEnginePage.FindFlags(0)
         self.findText('', flags, self.callback)
         self.search_requested.emit()
-
-
-    
-
-
         
 
 class PieChart(BaseEngineView):
@@ -120,4 +110,3 @@ class PieChart(BaseEngineView):
     def update(self, infile):
         self._update_data(infile)
         self._update_graph()
-
