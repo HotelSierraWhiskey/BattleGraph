@@ -8,15 +8,19 @@ class SearchWidget(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.field = QLineEdit()
-        self.button = QPushButton('Search')
+        self.search_button = QPushButton('Search')
+        self.clear_button = QPushButton('Clear Selections')
         
         self.field.setMaximumWidth(250)
-        self.button.setMaximumWidth(75)
+        self.search_button.setMaximumWidth(75)
+        self.clear_button.setMaximumWidth(150)
+
 
         with CVBoxLayout(self) as layout:
             with layout.hbox(align='right') as layout:
                 layout.add(self.field)
-                layout.add(self.button)
+                layout.add(self.search_button)
+                layout.add(self.clear_button)
             
 
 
@@ -31,6 +35,7 @@ class MainWindow(BaseMainWindow):
 
         self.current_file_label = QLabel('No file selected')
         self.status_label = QLabel('')
+        self.status_label.setMinimumHeight(45)
         self.search_widget = SearchWidget()
 
         self.main_menu = MainMenuBar()
@@ -43,6 +48,7 @@ class MainWindow(BaseMainWindow):
                             'Slot Distribution': self.pie_chart}
         
         self.tabs = QTabWidget()
+        self.tabs.currentChanged.connect(self.handle_tab_change)
         
         for k, v in self.tab_objects.items():
             self.tabs.addTab(v, k)
@@ -58,7 +64,8 @@ class MainWindow(BaseMainWindow):
         self.file_viewer.infile_changed.connect(self.update)
         self.file_viewer.search_requested.connect(self.search_widget.field.clear)
 
-        self.search_widget.button.clicked.connect(lambda: self.file_viewer.find(self.search_widget.field.text()))
+        self.search_widget.search_button.clicked.connect(lambda: self.file_viewer.find(self.search_widget.field.text()))
+        self.search_widget.clear_button.clicked.connect(self.file_viewer.clear)
 
         with CVBoxLayout(widget) as layout:
             with layout.hbox() as layout:
@@ -78,6 +85,13 @@ class MainWindow(BaseMainWindow):
         
         self.current_file_label.setText(self.infile)
         self.file_viewer.clear()
+
+    def handle_tab_change(self):
+        if self.tabs.currentWidget() != self.file_viewer:
+            self.search_widget.setHidden(True)
+            return
+        self.search_widget.setHidden(False)
+        
     
 
 
