@@ -54,7 +54,7 @@ class FileMenu(QMenu):
         with open(temphtml, 'r+') as file:
             txt = file.read()
             soup = BeautifulSoup(txt, features='html5lib')
-            fig = soup.new_tag('img', type="image/png", src='./fig.png')
+            fig = soup.new_tag('img', type="image/png", src='fig.png') 
             battlegraph_header = soup.new_tag('h3')
             battlegraph_header.insert(1, "Battlegraph Output")
             soup.body.append(battlegraph_header)
@@ -63,12 +63,16 @@ class FileMenu(QMenu):
 
         pdf = weasyprint.HTML(temphtml).write_pdf()
         open(f'{fname}.pdf', 'wb').write(pdf)
-        shutil.rmtree('./temp')
+        # shutil.rmtree('./temp')
         self.status_update.emit('Export complete')
         time.sleep(3)
         self.status_update.emit('')
 
-    
+
+class ShareMenu(QMenu):
+    def __init__(self, *args, **kwargs):
+        super().__init__(title='Share', *args, **kwargs)
+
 
 class MainMenuBar(QMenuBar):
     def __init__(self, *args, **kwargs):
@@ -76,5 +80,7 @@ class MainMenuBar(QMenuBar):
         self.setMaximumHeight(30)
 
         self.file_submenu = FileMenu()
+        self.share_submenu = ShareMenu()
 
         self.addMenu(self.file_submenu)
+        self.addMenu(self.share_submenu)
